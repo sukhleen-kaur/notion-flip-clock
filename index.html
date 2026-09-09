@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>World Clocks</title>
+  <style>
+    :root {
+      --bg: transparent;
+      --text: #111111;
+      --muted: #777777;
+      --card: #171717;
+      --card-text: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .clocks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 22px;
+      align-items: flex-start;
+    }
+
+    .clock {
+      min-width: 180px;
+    }
+
+    .city {
+      margin-bottom: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .time {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .digit {
+      width: 42px;
+      height: 58px;
+      border-radius: 6px;
+      background: var(--card);
+      color: var(--card-text);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 38px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .digit::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: rgba(0,0,0,0.8);
+    }
+
+    .colon {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 34px;
+      font-weight: 600;
+      line-height: 1;
+      padding: 0 1px;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 8px; }
+      .clocks { gap: 16px; }
+      .clock { min-width: 160px; }
+      .digit {
+        width: 36px;
+        height: 50px;
+        font-size: 32px;
+      }
+      .colon { font-size: 29px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="clocks" class="clocks"></div>
+
+  <script>
+    // Edit this list to add/remove clocks.
+    const CLOCKS = [
+      { city: "UTRECHT", zone: "Europe/Amsterdam" },
+      { city: "HOUSTON", zone: "America/Chicago" },
+      { city: "VANCOUVER", zone: "America/Vancouver" },
+    ];
+
+    const root = document.getElementById("clocks");
+
+    function timeInZone(zone) {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: zone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(new Date());
+
+      const hour = parts.find(p => p.type === "hour").value;
+      const minute = parts.find(p => p.type === "minute").value;
+      return hour + minute;
+    }
+
+    function createClock({ city, zone }) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "clock";
+
+      const label = document.createElement("div");
+      label.className = "city";
+      label.textContent = city;
+
+      const time = document.createElement("div");
+      time.className = "time";
+
+      const ids = ["h1", "h2", "m1", "m2"];
+      ids.forEach((_, i) => {
+        if (i === 2) {
+          const colon = document.createElement("div");
+          colon.className = "colon";
+          colon.textContent = ":";
+          time.appendChild(colon);
+        }
+        const digit = document.createElement("div");
+        digit.className = "digit";
+        digit.textContent = "0";
+        time.appendChild(digit);
+      });
+
+      wrapper.append(label, time);
+
+      return {
+        wrapper,
+        digits: [...time.querySelectorAll(".digit")],
+        zone
+      };
+    }
+
+    const clocks = CLOCKS.map(config => {
+      const clock = createClock(config);
+      root.appendChild(clock.wrapper);
+      return clock;
+    });
+
+    function update() {
+      for (const clock of clocks) {
+        const value = timeInZone(clock.zone);
+        clock.digits.forEach((digit, i) => {
+          digit.textContent = value[i];
+        });
+      }
+    }
+
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>
