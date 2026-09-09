@@ -6,11 +6,21 @@
   <title>World Clocks</title>
   <style>
     :root {
-      --bg: transparent;
+      --bg: #ffffff;
       --text: #111111;
       --muted: #777777;
       --card: #171717;
       --card-text: #ffffff;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #191919;
+        --text: #ffffff;
+        --muted: #9b9b9b;
+        --card: #2f2f2f;
+        --card-text: #ffffff;
+      }
     }
 
     * { box-sizing: border-box; }
